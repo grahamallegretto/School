@@ -1,7 +1,10 @@
 function [v, time] = EDLSimulation( SAName, Rl, EDLBiasVoltage, f, toPlot )
 %EDLSIMULATION Simulates the voltage response of the EDL energy harvester
 %based on the surface area of the top electrode
-% SAName - 
+    % SAName - Filename of Bose Data (Must be in proper format)
+    % Rl - Load Resistor
+    % EDLBiasVoltage - Voltage generated from formation of Double Layer
+    % toPlot - Set to true if you want plots
 
 close all;
 
@@ -115,6 +118,10 @@ dqdt = diff(q)./dt;
 v = (((Qb-q)/Cb) - ((Qt+q)./Ct)).*( Rl / ( Rf+Rl ));
 
 %% Plot The Data %%
+
+if exist('toPlot','var') == 0                         
+    toPlot = true;              % Load resistance
+end
 
 % Plot for self generated Sine/Step Waves
 if (size(SAName,2) == 4) && toPlot
