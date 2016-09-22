@@ -1,4 +1,4 @@
-function [v, time] = EDLSimulation( SAName, Rl, EDLBiasVoltage, f, toPlot )
+function [time, SA, v] = EDLSimulation( SAName, Rl, EDLBiasVoltage, f, toPlot )
 %EDLSIMULATION Simulates the voltage response of the EDL energy harvester
 %based on the surface area of the top electrode
     % SAName - Filename of Bose Data (Must be in proper format)

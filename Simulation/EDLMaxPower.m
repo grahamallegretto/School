@@ -4,16 +4,19 @@ function [pkPower avgPower] = EDLMaxPower
 
 pkPower = zeros(10,10);
 avgPower = zeros(10,10);
-for j = 1:10
-    for i = 1:40
-        [v, t] = EDLSimulation('sine', i*0.5*10^6, 0.7, j, false);
+frequencies = 20;
+
+for j = 1:frequencies 
+    for i = 1:100
+        [~, ~, v] = EDLSimulation('sine', i*0.2*10^6, 0.7, j, false);
         [pkPower(i,j) avgPower(i,j)] = powerCalc(v, i*10^6); 
     end
 end
 
 hold on
-for j = 1:10
-    plot(avgPower(:,j));
+for j = 1:frequencies 
+    plot(0.2:0.2:20,avgPower(:,j));
+    title('Average Power');
 end
 
 end
