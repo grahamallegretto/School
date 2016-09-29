@@ -2,18 +2,20 @@ function [output] = dataCruncher( file, vDeadband, frequencies, dataColumn, fDea
 %DATACRUNCHER Summary of this function goes here
 %   Detailed explanation goes here
 
+% Argument for separating data points based on their frequency
+if nargin < 5
+    fDeadband = 0.1;
+end
+
 % Read in data
 data = headerIgnoreCSVRead( file );
 data = data(:,[2 dataColumn]);
-
-%%
 
 % Normalize data
 avg = mean(data(:,2));
 data(:,2) = data(:,2) - avg;
 [pks, troughs] = findPeaks( data(:,2), vDeadband );
    
-%%
 % Calculate peak2peak and frequency
 try
     % Sometimes the two arrays aren't the same size so we need to truncate
@@ -32,20 +34,17 @@ period = diff( data(pks(:,1),1) );
 freq = 1./period;
 dataPoints = [freq peak2peak];
 
-if nargin < 5
-    fDeadband = 0.5;
-end
-
 % Separate the data based on frequencies
 output = zeros(size(frequencies,2),2);
 for i = 1:size(frequencies,2)
-    tempData = dataPoints(abs(freq-frequencies(i)) < fDeadband, :);    
     
-    % There's a tendency for the first few data points to be out of whack
-    % so we just ignore them
-    if size(tempData,1) > 3
-        tempData = tempData(2:end-1,:);
-    end
+    DB = frequencies(i)*fDeadband;
+    tempData = dataPoints(abs(freq-frequencies(i)) < DB, :);    
+    
+    % Ignore the first portion of the data points and the last
+    startIgnoreSpan = floor( size(tempData,1)*(1/4) );
+    endIgnoreSpan = floor( size(tempData,1)*0.1 );
+    tempData = tempData(startIgnoreSpan:end-endIgnoreSpan,:);
     
     output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))*1000];
 end
