@@ -18,9 +18,9 @@ fileID = fopen('temp.csv','w+');
 fwrite(fileID, buffer);
 fclose(fileID);
 
-% Reimport it with csv read and delete temporary file
+% Reimport it with csv read
 data = csvread('temp.csv');
-delete('temp.csv');
+rm('tem
 
 end
 

@@ -1,23 +1,43 @@
-function [pkPower avgPower] = EDLMaxPower
+function EDLMaxPower
 %EDLMAXPOWER Summary of this function goes here
 %   Detailed explanation goes here
 
-pkPower = zeros(10,10);
-avgPower = zeros(10,10);
-frequencies = 20;
+close all
 
-for j = 1:frequencies 
-    for i = 1:100
-        [~, ~, v] = EDLSimulation('sine', i*0.2*10^6, 0.7, j, false);
+%% Parameters
+maxFreq = 30;
+maxR = 20e6;
+dr = 0.1e6; 
+
+%% Perform Simulations
+resistance = dr:dr:maxR;
+freqs = 1:maxFreq;
+pkPower = zeros(size(resistance,2),maxFreq);
+avgPower = zeros(size(resistance,2),maxFreq);
+
+for j = freqs 
+    for i = 1:size(resistance,2)
+        [~, ~, v] = EDLSimulation('sine', resistance(i), 0.7, j, false);
         [pkPower(i,j) avgPower(i,j)] = powerCalc(v, i*10^6); 
     end
+    [maxPower(j),maxPowerIdx(j)] = max(avgPower(:,j));
 end
 
-hold on
-for j = 1:frequencies 
-    plot(0.2:0.2:20,avgPower(:,j));
-    title('Average Power');
+%% Plot
+temp = subplot(1,2,1);
+hold(temp,'on');
+for j = freqs 
+    plot(resistance,avgPower(:,j),resistance(maxPowerIdx(j)),maxPower(j),'r*');
 end
+title('Average Power');
+xlabel('Resistance (Ohm)');
+ylabel('Average Power (W)');
+
+subplot(1,2,2);
+plot(freqs,resistance(maxPowerIdx(:)),'.',freqs,2.198e7./freqs); 
+title('Resistance Vs. Frequency');
+xlabel('Frequency (f)');
+ylabel('Resistance (R)');
 
 end
 

@@ -1,0 +1,67 @@
+function [output] = dataCruncher( file, vDeadband, frequencies, dataColumn, fDeadband  )
+%DATACRUNCHER Summary of this function goes here
+%   Detailed explanation goes here
+
+% Read in data
+data = headerIgnoreCSVRead( file );
+data = data(:,[2 dataColumn]);
+
+%%
+
+% Normalize data
+avg = mean(data(:,2));
+data(:,2) = data(:,2) - avg;
+[pks, troughs] = findPeaks( data(:,2), vDeadband );
+   
+%%
+% Calculate peak2peak and frequency
+try
+    % Sometimes the two arrays aren't the same size so we need to truncate
+    % the longer array
+    peak2peak = pks(:,2) - troughs(:,2);
+catch                                     
+    if size(pks,1) > size(troughs,1)
+        pks = pks(1:size(troughs,1),:);
+    else
+        troughs = troughs(1:size(pks,1),:);
+    end
+    peak2peak = pks(:,2) - troughs(:,2);
+end
+peak2peak = peak2peak(1:end-1);
+period = diff( data(pks(:,1),1) );
+freq = 1./period;
+dataPoints = [freq peak2peak];
+
+if nargin < 5
+    fDeadband = 0.5;
+end
+
+% Separate the data based on frequencies
+output = zeros(size(frequencies,2),2);
+for i = 1:size(frequencies,2)
+    tempData = dataPoints(abs(freq-frequencies(i)) < fDeadband, :);    
+    
+    % There's a tendency for the first few data points to be out of whack
+    % so we just ignore them
+    if size(tempData,1) > 3
+        tempData = tempData(2:end-1,:);
+    end
+    
+    output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))*1000];
+end
+
+% Plot for inspection
+subplot(1,2,1);
+title( file );
+plot(1:size(data,1),data(:,2),pks(:,1),pks(:,2),'r.',troughs(:,1),troughs(:,2),'b.')
+
+subplot(1,2,2);
+scatter(output(:,1), output(:,2), 50, 'r', 'filled');
+try
+    axis([0 frequencies(end)+5 0 max(output(:,2))*1.05]);
+end
+xlabel('Frequency (Hz)');
+ylabel('Peak-to-Peak Voltage (V_p_p)');
+
+end
+

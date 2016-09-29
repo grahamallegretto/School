@@ -35,7 +35,7 @@ Amax = 19.57;           % Max surface area (mm^2)
 Amin = 9.3;             % Min surface area (mm^2)
 Abottom = 28;           % Bottom surface area (mm^2)
 dt = 0.0001;            % Delta T
-numCycles = 4;          % Length of time to run the simulation
+numCycles = 10;          % Length of time to run the simulation
 time = 0:dt:numCycles*(1/f); % Time
 upConFactor = 10;       % Upconversion factor
     
