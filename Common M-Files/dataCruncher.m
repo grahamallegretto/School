@@ -1,6 +1,8 @@
-function [output] = dataCruncher( file, vDeadband, frequencies, dataColumn, fDeadband  )
+function [output] = dataCruncher( file, vDeadband, frequencies, fDeadband  )
 %DATACRUNCHER Summary of this function goes here
 %   Detailed explanation goes here
+
+close all
 
 % Argument for separating data points based on their frequency
 if nargin < 5
@@ -9,12 +11,11 @@ end
 
 % Read in data
 data = headerIgnoreCSVRead( file );
-data = data(:,[2 dataColumn]);
 
 % Normalize data
-avg = mean(data(:,2));
-data(:,2) = data(:,2) - avg;
-[pks, troughs] = findPeaks( data(:,2), vDeadband );
+avg = mean(data(:,6));
+data(:,6) = data(:,6) - avg;
+[pks, troughs] = findPeaks( data(:,6), vDeadband );
    
 % Calculate peak2peak and frequency
 try
@@ -30,29 +31,36 @@ catch
     peak2peak = pks(:,2) - troughs(:,2);
 end
 peak2peak = peak2peak(1:end-1);
-period = diff( data(pks(:,1),1) );
+period = diff( data(pks(:,1),2) );
 freq = 1./period;
 dataPoints = [freq peak2peak];
 
 % Separate the data based on frequencies
-output = zeros(size(frequencies,2),2);
+output = zeros(size(frequencies,2),3);
 for i = 1:size(frequencies,2)
     
     DB = frequencies(i)*fDeadband;
-    tempData = dataPoints(abs(freq-frequencies(i)) < DB, :);    
+    tempData = dataPoints( abs(freq-frequencies(i)) < DB, : );
+    dataRange = pks( abs(freq-frequencies(i)) < DB, 1 );
     
     % Ignore the first portion of the data points and the last
     startIgnoreSpan = floor( size(tempData,1)*(1/4) );
     endIgnoreSpan = floor( size(tempData,1)*0.1 );
     tempData = tempData(startIgnoreSpan:end-endIgnoreSpan,:);
+    dataRange = dataRange(startIgnoreSpan:end-endIgnoreSpan,:); 
+    dataRange = dataRange(1):dataRange(end);
     
-    output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))*1000];
+    % Determine the phase shift
+    phaseShift = phaseShiftFind( data(dataRange,4), -1.*data(dataRange,6),...
+        1/frequencies(i), 1/(data(2,2)-data(1,2)));
+    
+    output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))*1000 phaseShift];
 end
 
 % Plot for inspection
 subplot(1,2,1);
 title( file );
-plot(1:size(data,1),data(:,2),pks(:,1),pks(:,2),'r.',troughs(:,1),troughs(:,2),'b.')
+plot(1:size(data,1),data(:,6),pks(:,1),pks(:,2),'r.',troughs(:,1),troughs(:,2),'b.')
 
 subplot(1,2,2);
 scatter(output(:,1), output(:,2), 50, 'r', 'filled');
@@ -61,6 +69,22 @@ try
 end
 xlabel('Frequency (Hz)');
 ylabel('Peak-to-Peak Voltage (V_p_p)');
+
+% Bode Plot
+figure
+subplot(2,1,1);
+loglog( output(:,1), output(:,2) );
+grid on
+title( 'Magnitude Response' );
+xlabel( 'Frequency (Hz)' );
+ylabel( 'Amplitude (V)' );
+
+subplot(2,1,2);
+semilogx( output(:,1), output(:,3) );
+grid on
+title( 'Phase Response' );
+xlabel( 'Frequency (Hz)' );
+ylabel( 'Phase (Degree)' );
 
 end
 
