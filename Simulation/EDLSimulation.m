@@ -31,19 +31,21 @@ dPTFE = 30e-9;          % Thickness of PTFE Layer (m)
 if exist('f','var') == 0    
     f  = 1;                 % Frequency of modulation (Hz)
 end
-Amax = 19.57;           % Max surface area (mm^2)
+Amax = 30;           % Max surface area (mm^2)
 Amin = 9.3;             % Min surface area (mm^2)
-Abottom = 28;           % Bottom surface area (mm^2)
-dt = 0.0001;            % Delta T
-numCycles = 10;          % Length of time to run the simulation
-time = 0:dt:numCycles*(1/f); % Time
-upConFactor = 10;       % Upconversion factor
+Abottom = 40;           % Bottom surface area (mm^2)
+numSamples = 100000;    % Number of samples for artificial signals
+numCycles = 5;          % Length of time to run the simulation
+
+dt = (numCycles*(1/f) ) / numSamples;       % Delta T
+time = 0:dt:numCycles*(1/f);                % Time
+upConFactor = 10;                           % Upconversion factor
     
 %% Surface Area Signal %%
 % Can either be a signal that is passed in as a parameter or a step or sine
 % wave generated based on the constants listed above
-SAOffset = ((Amax - Amin) / 2) + Amin;
-SAamp = (Amax - Amin) / 2;
+SAOffset = 27;%((Amax - Amin) / 2) + Amin;
+SAamp = 13.5;%(Amax - Amin) / 2;
 
 if size(SAName,2) == 4
     
@@ -56,7 +58,6 @@ if size(SAName,2) == 4
         SA = zeros(size(time,2),1);
         SA(1:end) = Amin;
         SA( floor(size(SA,1)/2):end, 1 ) = Amax;
-
     end
     
     % If data is passed in
@@ -120,12 +121,17 @@ v = (((Qb-q)/Cb) - ((Qt+q)./Ct)).*( Rl / ( Rf+Rl ));
 %% Plot The Data %%
 
 if exist('toPlot','var') == 0                         
-    toPlot = true;              % Load resistance
+    toPlot = true;            
 end
 
 % Plot for self generated Sine/Step Waves
 if (size(SAName,2) == 4) && toPlot
-    plotyy(time, SA, time, v);
+
+    subplot(2,1,1);
+    plotyy( time, SA, time(1:end-1), dqdt );
+    title('Voltage');
+    subplot(2,1,2);
+    plot(time,q);
     
 % Plot for Bose Data
 elseif toPlot

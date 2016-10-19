@@ -45,13 +45,14 @@ for i = 1:size(frequencies,2)
     
     % Ignore the first portion of the data points and the last
     startIgnoreSpan = floor( size(tempData,1)*(1/4) );
-    endIgnoreSpan = floor( size(tempData,1)*0.1 );
+    endIgnoreSpan = floor( size(tempData,1)*0.4 );
     tempData = tempData(startIgnoreSpan:end-endIgnoreSpan,:);
     dataRange = dataRange(startIgnoreSpan:end-endIgnoreSpan,:); 
     dataRange = dataRange(1):dataRange(end);
     
     % Determine the phase shift
-    phaseShift = phaseShiftFind( data(dataRange,4), -1.*data(dataRange,6),...
+        % Must multiply the Surface area data by -1 because 
+    phaseShift = phaseShiftFind( -1.*data(dataRange,4), data(dataRange,6),...
         1/frequencies(i), 1/(data(2,2)-data(1,2)));
     
     output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))*1000 phaseShift];
@@ -71,20 +72,7 @@ xlabel('Frequency (Hz)');
 ylabel('Peak-to-Peak Voltage (V_p_p)');
 
 % Bode Plot
-figure
-subplot(2,1,1);
-loglog( output(:,1), output(:,2) );
-grid on
-title( 'Magnitude Response' );
-xlabel( 'Frequency (Hz)' );
-ylabel( 'Amplitude (V)' );
-
-subplot(2,1,2);
-semilogx( output(:,1), output(:,3) );
-grid on
-title( 'Phase Response' );
-xlabel( 'Frequency (Hz)' );
-ylabel( 'Phase (Degree)' );
+bodePlot( output(:,1), output(:,2), output(:,3) );
 
 end
 

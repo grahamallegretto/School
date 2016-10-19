@@ -23,41 +23,36 @@ maximin = maximin(order,:);
 % Ensure that there is a trough between every peak and a peak between
 % every trough.
 i = 1;
+idxPk = 1;
+idxTr = 1;
+clear pks; clear troughs;
 while i < size(maximin,1)
-    % Is it a trough?
-    if maximin(i,2) < 0
-        i = i + 1;
-        % Make sure it's the lowest trough
-        if maximin(i,2) < maximin(i-1,2)
-            maximin(i-1,2) = 0;
-        else
-            % Get rid of any troughs that are after the heighest one and
-            % before the next peak
-            while (maximin(i,2) < 0) && (i < size(maximin,1))
-                maximin(i,2) = 0;
-                i = i + 1;
-            end
+    % Is it a Peak?
+    if maximin(i,2) > 0
+        % Get all the peaks corresponding to a maximum
+        j = i;
+        while (maximin(j,2) > 0) && (j < size(maximin,1))
+            j = j+1;
         end
+        [pks(idxPk,2), idx] = max( maximin(i:j-1,2) );
+        pks(idxPk,1) = maximin(i+idx-1,1);
+        idxPk = idxPk + 1;
+        i = j;
     else
-        i = i + 1;
-        % Make sure it's the highest peak
-        if maximin(i,2) > maximin(i-1,2)
-            maximin(i-1,2) = 0;
-        else       
-            % Get rid of any peaks that are after the lowest one and
-            % before the next trough
-            while (maximin(i,2) > 0) && (i < size(maximin,1))
-                maximin(i,2) = 0;
-                i = i + 1;
-            end
+        % Get all the troughs corresponding to a maximum
+        j = i;
+        while (maximin(j,2) < 0) && (j < size(maximin,1))
+            j = j+1;
         end
+        [troughs(idxTr,2), idx] = min( maximin(i:j-1,2) );
+        troughs(idxTr,1) = maximin(i+idx-1,1);
+        idxTr = idxTr + 1;
+        i = j;
     end
 end
-maximin = maximin( abs(maximin(:,2)) > 0, : ); 
 
-% Determine the peaks for the period calculation
-pks = maximin(maximin(:,2)>0,:);
-troughs = maximin(maximin(:,2)<0,:);
+% Plot for inspection
+% plot(1:size(data,1),data(:,1),pks(:,1),pks(:,2),'r.',troughs(:,1),troughs(:,2),'b.')
 
 end
 
