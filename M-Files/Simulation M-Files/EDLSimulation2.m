@@ -1,4 +1,4 @@
-function [time, SA, v] = EDLSimulation( SAName, varargin )
+function [time, SA, v, VlinOut] = EDLSimulation2( SAName, varargin )
 %EDLSIMULATION Simulates the voltage response of the EDL energy harvester
 %based on the surface area of the top electrode
     % SAName - Filename of Bose Data (Must be in proper format)
@@ -68,7 +68,7 @@ end
 
 %% Surface Area Signal %%
 % Can either be a signal that is passed in as a parameter or a step or sine
-% wave generated based on the constants listed above
+% wave generated based on the constants listed above,
 dt = (numCycles*(1/f) ) / numSamples;       % Delta T
 time = 0:dt:numCycles*(1/f);                % Time
 Amax = SAOffset + SAAmp;
@@ -116,7 +116,6 @@ Cb = (epsilon * ed * Abottom * 1e-6) / lambdaD; % Bottom capacitance
 CbR = Cb*Rprime;                                % Intermediate value
 CtPerArea = (epsilon * ep * 1e-6) / dPTFE;      % Capacitance of the top electrode without the area component (F/mm^2)
 Ct = CtPerArea .* SA;
-Ct(1);
 
 % Initial Charge Calculation
     % Assuming at the beginning that there is no current flow, therefore 
@@ -173,8 +172,15 @@ if (size(SAName,2) == 4) && toPlot
     
 % Plot for Bose Data
 elseif toPlot
+    subplot(2,1,1);
+    plot(time, SA);
+    title('Surface Area Plot');
+    axis([0 time(end) -inf inf]);
+    xlabel('Time (s)');
+    ylabel('Surface Area (mm^2)');
     
-    plot( SAData(:,1), SAData(:,3), time, v );
+    subplot(2,1,2);
+    plot( SAData(:,1), -1.*SAData(:,3), time, v );
     title('Voltage Response');
     legend('Measured','Simulated');
     axis([0 time(end) -inf inf]);
