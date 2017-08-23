@@ -1,4 +1,4 @@
-function [vOffset, vAmp, phase] = biasEffect( data, numIntervals, plotOn )
+function out = biasEffect( data, period, plotOn )
 %BIASEFFECT Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -8,15 +8,12 @@ close all
 if ischar(data) 
     data = headerIgnoreCSVRead( data );
 end
-
-% Check if variables exist
-if ~exist( 'numIntervals', 'var' )
-    numIntervals = floor( size(data, 1) / 5000 );  
-end
+    
 if ~exist( 'plotOn', 'var' )
     plotOn = false;
 end
 
+numIntervals = floor( size(data, 1) / (period*1000) );  
 intervalLeng = floor( size(data, 1) / numIntervals );
 vOffset = zeros(numIntervals,1);
 vAmp = zeros(numIntervals,1);
@@ -34,8 +31,8 @@ for i = 1:numIntervals
     rawRangeEnd = intervalLeng * i;
     
     % Allow for time for the the output to normalize
-    rangeStart = rawRangeStart + floor(intervalLeng * 0.2);
-    rangeEnd = rawRangeEnd - floor(intervalLeng * 0.2);
+    rangeStart = rawRangeStart + floor(intervalLeng * 0.3);
+    rangeEnd = rawRangeEnd - floor(intervalLeng * 0.3);
     biasInterval = rangeStart:rangeEnd;
     
     vOffset(i) = mean( data(biasInterval,6) );
@@ -43,8 +40,13 @@ for i = 1:numIntervals
     
     % Eliminate the first and last peak and trough so that it doesn't get
     % the edges
-    pks = pks(2:end-1,:);
-    troughs = troughs(2:end-1,:);
+    if size(pks,1) > 3 
+        pks = pks(2:end-1,:);
+    end
+    
+    if size(troughs,1) > 3
+        troughs = troughs(2:end-1,:);
+    end
     
     % Plot Intervals
     if plotOn
@@ -65,6 +67,9 @@ subplot(2,1,1);
 plot( vOffset, vAmp );
 subplot(2,1,2);
 plot( vOffset, phase );
+
+
+out = [vOffset, vAmp, phase];
 
 end
 

@@ -1,4 +1,4 @@
-function out = bodePlotSimulation( fRange, Rl, SAOffset, SAAmp, Vdl, model, varargin )
+function out = bodePlotSimulation2( fRange, Rl, SAOffset, SAAmp, Vdl, model, varargin )
 %BODEPLOT Summary of this function goes here
 %   Detailed explanation goes here
 

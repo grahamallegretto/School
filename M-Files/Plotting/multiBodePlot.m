@@ -8,9 +8,7 @@ function multiBodePlot( data )
 close all
 win(1) = subplot(2,1,1);
     grid on
-    title( 'Magnitude Response' );
-    xlabel( 'Frequency (Hz)' );
-    ylabel( 'Amplitude' );
+    ylabel( 'Gain (V mm^-^2)' );
     set( win(1), 'XScale', 'log' );
     set( win(1), 'YScale', 'log' );
     hold on

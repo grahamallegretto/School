@@ -61,7 +61,7 @@ for i = 1:size(frequencies,2)
     phaseShift = phaseShiftFind( -1.*data(dataRange,4), data(dataRange,6),...
         1/frequencies(i), 1/(data(2,2)-data(1,2)));
     
-    output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))/2 phaseShift];
+    output(i,:) = [mean(tempData(:,1)) mean(tempData(:,2))/2 phaseShift ];
 end
 
 

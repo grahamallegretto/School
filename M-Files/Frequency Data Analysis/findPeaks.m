@@ -56,8 +56,13 @@ while i < size(maximin,1)
     end
 end
 
-pks(:,2) = pks(:,2) + preAverage;
-troughs(:,2) = troughs(:,2) + preAverage;
+try
+    pks(:,2) = pks(:,2) + preAverage;
+    troughs(:,2) = troughs(:,2) + preAverage;
+catch
+    pks = [0, 0];
+    troughs = [0, 0];
+end
 % Plot for inspection
 % plot(1:size(data,1),data(:,1),pks(:,1),pks(:,2),'r.',troughs(:,1),troughs(:,2),'b.')
 
